@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn(){ return request.auth != null; }
+    function isAdmin(){ return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    function isOwner(uid){ return isSignedIn() && request.auth.uid == uid; }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid) && request.resource.data.keys().hasOnly(['displayName','email','language','homeArea','watchedAreas','familyCircleId','createdAt','lastAuthAt','age','updatedAt','emergencyContacts','phoneVerified','phoneNumber','phoneVerifiedAt','fcmToken','pushEnabled','fcmUpdatedAt','photoDataUrl','photoURL']) && (!('phoneVerified' in request.resource.data) || request.resource.data.phoneVerified == ('phone_number' in request.auth.token)) && (!('phoneNumber' in request.resource.data) || request.resource.data.phoneNumber == request.auth.token.phone_number);
+      allow update: if isOwner(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName','email','language','homeArea','watchedAreas','familyCircleId','createdAt','lastAuthAt','age','updatedAt','emergencyContacts','phoneVerified','phoneNumber','phoneVerifiedAt','fcmToken','pushEnabled','fcmUpdatedAt','photoDataUrl','photoURL']) && (!('phoneVerified' in request.resource.data) || request.resource.data.phoneVerified == ('phone_number' in request.auth.token)) && (!('phoneNumber' in request.resource.data) || request.resource.data.phoneNumber == request.auth.token.phone_number);
+      allow delete: if isAdmin();
+    }
+    match /admins/{uid} { allow read: if isAdmin() || isOwner(uid); allow write: if isAdmin(); }
+    match /alerts/{id} { allow read: if true; allow create,update,delete: if isAdmin(); }
+    match /riverStations/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /reports/{id} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.locationPrivacy in ['exact','approximate','off']);
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid && request.resource.data.keys().hasOnly(['uid','displayName','anonymous','type','description','photoUrls','lat','lng','districtId','districtName','noticedAt','roadStatus','verified','verifiedByPhone','likes','commentCount','createdAt','expiresAt','locationPrivacy','publicLocationConsent']) && request.resource.data.locationPrivacy in ['exact','approximate','off'] && request.resource.data.publicLocationConsent is bool && request.resource.data.anonymous is bool && request.resource.data.type in ['flood','landslide','road','tree','other'] && request.resource.data.description is string && request.resource.data.description.size() >= 6 && request.resource.data.description.size() <= 500 && request.resource.data.displayName is string && request.resource.data.displayName.size() <= 100 && request.resource.data.photoUrls is list && request.resource.data.photoUrls.size() <= 4 && request.resource.data.noticedAt is timestamp && request.resource.data.createdAt == request.time && request.resource.data.expiresAt is timestamp && !request.resource.data.keys().hasAny(['accuracy','address']) && ((request.resource.data.publicLocationConsent == false && !request.resource.data.keys().hasAny(['lat','lng','districtId','districtName'])) || (request.resource.data.publicLocationConsent == true && request.resource.data.locationPrivacy == 'exact' && request.resource.data.keys().hasAll(['lat','lng']) && request.resource.data.lat is number && request.resource.data.lng is number && request.resource.data.lat >= 5 && request.resource.data.lat <= 11 && request.resource.data.lng >= 78 && request.resource.data.lng <= 83) || (request.resource.data.publicLocationConsent == true && request.resource.data.locationPrivacy == 'approximate' && request.resource.data.keys().hasAll(['districtId','districtName']) && !request.resource.data.keys().hasAny(['lat','lng']))) && (!('verified' in request.resource.data) || request.resource.data.verified == ('phone_number' in request.auth.token)) && (!('verifiedByPhone' in request.resource.data) || request.resource.data.verifiedByPhone == ('phone_number' in request.auth.token));
+      allow update: if isAdmin() || (isOwner(resource.data.uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']));
+      allow delete: if isAdmin() || isOwner(resource.data.uid);
+    }
+    match /reportLocations/{reportId} {
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid && get(/databases/$(database)/documents/reports/$(reportId)).data.uid == request.auth.uid;
+      allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow update,delete: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+    }
+    match /communityNotices/{id} { allow read: if true; allow create,update,delete: if isAdmin(); }
+    match /safetyCheckins/{id} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn()
+        && request.resource.data.keys().hasOnly(['uid','displayName','districtId','createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() <= 100
+        && (request.resource.data.districtId == null || (request.resource.data.districtId is string && request.resource.data.districtId.size() <= 80))
+        && request.resource.data.createdAt == request.time;
+      allow update,delete: if false;
+    }
+    match /familyCircles/{circleId} {
+      allow create: if isSignedIn()
+        && request.resource.data.keys().hasOnly(['inviteCode','name','createdBy','createdAt'])
+        && request.resource.data.inviteCode == circleId
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.createdAt == request.time;
+      allow read: if isSignedIn() && (resource.data.createdBy == request.auth.uid || exists(/databases/$(database)/documents/familyCircles/$(circleId)/members/$(request.auth.uid)));
+      allow update: if false;
+      allow delete: if isSignedIn() && resource.data.createdBy == request.auth.uid;
+      match /members/{uid} {
+        allow read: if isSignedIn() && (uid == request.auth.uid || get(/databases/$(database)/documents/familyCircles/$(circleId)).data.createdBy == request.auth.uid || exists(/databases/$(database)/documents/familyCircles/$(circleId)/members/$(request.auth.uid)));
+        allow create: if isSignedIn()
+          && uid == request.auth.uid
+          && exists(/databases/$(database)/documents/familyCircles/$(circleId))
+          && get(/databases/$(database)/documents/familyCircles/$(circleId)).data.inviteCode == circleId
+          && request.resource.data.keys().hasOnly(['uid','displayName','status','joinedAt','inviteCode'])
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.inviteCode == circleId
+          && request.resource.data.displayName is string
+          && request.resource.data.displayName.size() <= 100
+          && request.resource.data.status == 'unknown'
+          && request.resource.data.joinedAt == request.time;
+        allow update: if isSignedIn()
+          && uid == request.auth.uid
+          && resource.data.uid == request.auth.uid
+          && resource.data.inviteCode == circleId
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.inviteCode == resource.data.inviteCode
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName','status','lastCheckinAt'])
+          && request.resource.data.displayName is string
+          && request.resource.data.displayName.size() <= 100
+          && request.resource.data.status in ['unknown','safe','needs_help']
+          && request.resource.data.lastCheckinAt == request.time;
+        allow delete: if isSignedIn() && (uid == request.auth.uid || get(/databases/$(database)/documents/familyCircles/$(circleId)).data.createdBy == request.auth.uid);
+      }
+    }
+    match /auditLogs/{id} { allow read,create: if isAdmin(); allow update,delete: if false; }
+  }
+}
+

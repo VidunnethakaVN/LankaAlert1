@@ -1,0 +1,28 @@
+LankaAlert SUPER desktop upgrade — 2026-09-22
+
+UI
+- Desktop-first professional safety dashboard inspired by the supplied TrustCraft reference: dark navy shell, fixed navigation, compact header, command search, spacious cards, restrained accents, data-forward status blocks.
+- Replaced emoji-style UI graphics with a reusable inline SVG custom icon system in js/custom-icons.js.
+- Added responsive behavior for tablet/mobile without making the desktop layout feel like a stretched phone screen.
+- Added clearer RiverNet station/source treatment in the Live Conditions panel.
+
+LANGUAGES
+- Main citizen UI supports Sinhala, Tamil and English through js/i18n.js.
+- Added translation hooks for the landing page, desktop navigation, dashboard labels, safety tools, map controls, report insights and admin navigation.
+
+SECURITY
+- Removed browser-side external API-key object from firebase-config.js.
+- Firebase web config remains client-visible by design; authorization is enforced by Auth + Firestore/Storage rules.
+- Added server-side RiverNet proxy through Firebase Functions.
+- RiverNet credential is never returned to the browser and is intended for Secret Manager via RIVERNET_API_KEY.
+- Added origin allow-list, input validation, timeout, response normalization and lightweight rate limiting to the RiverNet proxy.
+- Added CSP and common security headers in firebase.json.
+- Tightened Firestore/Storage access rules for reports, family circles and admin documents.
+
+RIVERNET.LK
+- Added js/rivernet.js and a Firebase Function named rivernetProxy.
+- The integration expects the exact RiverNet API endpoint/auth scheme supplied by the RiverNet operator. No real RiverNet credential was present in the supplied project, so no fake key was inserted.
+- See SETUP.md for the secure secret/deployment steps.
+
+
+2026-09-23 FIXED: Firebase Storage removed entirely because this project does not need media storage. Google authentication flow hardened for desktop/mobile and now shows provider/domain-specific errors. RiverNet proxy requires a Firebase ID token.

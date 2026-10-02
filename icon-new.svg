@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg" x1="30" y1="20" x2="224" y2="236" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B1730"/>
+      <stop offset="0.55" stop-color="#111C3C"/>
+      <stop offset="1" stop-color="#07101F"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="72" y1="42" x2="188" y2="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF5A3D"/>
+      <stop offset="0.45" stop-color="#EF2D3A"/>
+      <stop offset="1" stop-color="#A80E32"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="72" y1="40" x2="188" y2="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFB36B"/>
+      <stop offset="1" stop-color="#FF5A3D"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="42%" r="55%">
+      <stop offset="0" stop-color="#FF4B3E" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#FF4B3E" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="62" fill="url(#bg)"/>
+  <rect x="9.5" y="9.5" width="237" height="237" rx="60.5" fill="none" stroke="#6B7EA3" stroke-opacity="0.38" stroke-width="3"/>
+  <circle cx="128" cy="108" r="92" fill="url(#glow)"/>
+  <g filter="url(#shadow)">
+    <path d="M128 40 193 64v52c0 43-25 76-65 99-40-23-65-56-65-99V64l65-24Z" fill="url(#shield)" stroke="url(#edge)" stroke-width="5"/>
+    <path d="M128 54 178 73v42c0 32-17 58-50 79-33-21-50-47-50-79V73l50-19Z" fill="#B51132" fill-opacity="0.24"/>
+  </g>
+  <path d="M128 78 158 137h-24l-6 40-30-58h24l6-41Z" fill="#FFFDF9"/>
+  <circle cx="128" cy="78" r="6" fill="#FFFDF9"/>
+  <path d="M87 187c17 10 29 16 41 23 12-7 24-13 41-23" fill="none" stroke="#FFB36B" stroke-width="5" stroke-linecap="round" stroke-opacity="0.85"/>
+  <path d="M73 201c19 14 36 23 55 31 19-8 36-17 55-31" fill="none" stroke="#60A5FA" stroke-width="3" stroke-linecap="round" stroke-opacity="0.6"/>
+  <circle cx="205" cy="52" r="11" fill="#22C55E" stroke="#D1FAE5" stroke-width="4"/>
+</svg>

@@ -1,0 +1,4 @@
+name = "lankaalert-dmc"
+main = "worker/dmc-proxy.js"
+compatibility_date = "2026-10-01"
+workers_dev = true

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LankaAlert — Admin Portal</title>
+<link rel="stylesheet" href="css/style.css?v=20260924v21">
+<link rel="stylesheet" href="css/professional.css?v=20260924v21">
+<link rel="stylesheet" href="css/v15-professional.css?v=20260924v21">
+<link rel="stylesheet" href="css/v20-system.css?v=20260924v21">
+<link rel="stylesheet" href="css/login-fix.css?v=20260924v21">
+<script src="js/custom-icons.js?v=20260924v30"></script>
+<link rel="stylesheet" href="css/v30-icon-system.css?v=20260924v30">
+<link rel="icon" type="image/svg+xml" href="icon.svg?v=20260924v30">
+<link rel="alternate icon" type="image/png" href="favicon-32.png?v=20260924v30">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20260924v30">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=20260924v30">
+<link rel="stylesheet" href="css/trustcraft-inspired.css?v=20260928tc1"><link rel="stylesheet" href="css/sinhala-apple-typography.css?v=20260928si3"><link rel="stylesheet" href="css/final-ui-cleanup.css?v=20260928ui1"><style>.uid-result{display:grid;gap:10px;margin-top:14px;padding:14px;border:1px solid #b7e5c8;border-radius:14px;background:#effaf3}.uid-result[hidden]{display:none!important}.uid-result code{display:block;overflow-wrap:anywhere;padding:10px;border-radius:9px;background:rgba(0,0,0,.06);font-size:13px;font-weight:700;user-select:all}.uid-result p{margin:0;line-height:1.5}</style></head>
+<body>
+  <div class="login-page">
+    <div class="panel login-card glow-border">
+      <div class="brand mb16"><div class="logo"><img class="brand-logo-image" src="assets/Logo.webp" alt="LankaAlert"></div> LankaAlert <span class="sub">Admin</span></div>
+      <p class="muted small mb16">Restricted to Disaster Management Centre / district officials. This portal is intentionally
+      separate from the citizen Google sign-in — your Firebase account must also have an <code>admins/&lt;uid&gt;</code> document
+      before access is granted.</p>
+
+      <div class="field">
+        <label>Email</label>
+        <input id="email" type="email" placeholder="admin@dmc.gov.lk">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="password" type="password" placeholder="••••••••">
+      </div>
+      <button id="loginBtn" class="btn block">Sign in</button><button id="resetPasswordBtn" class="btn ghost block" type="button">Forgot password?</button>
+      <p id="err" class="small mt12" style="color:var(--red);display:none;"></p>
+<p id="setupMsg" class="small mt12" role="status" aria-live="polite" style="display:none;color:#23784b;"></p>
+<div id="uidResult" class="uid-result" hidden role="region" aria-label="Firebase user ID"><b>Firebase UID — copy this ID</b><code id="uidValue"></code><button id="copyUidBtn" class="btn small secondary" type="button">Copy UID</button><p class="small muted">Paste this UID into Firestore → <code>admins</code> as the document ID. Keep this page open until you copy it.</p></div>
+
+      <details class="mt20">
+        <summary class="small muted">First time setup / create admin account</summary>
+        <div class="mt12">
+          <div class="field"><label>Full name</label><input id="regName" placeholder="D.M. Officer"></div>
+          <div class="field"><label>Email</label><input id="regEmail" type="email"></div>
+          <div class="field"><label>Password (min 6 chars)</label><input id="regPass" type="password"></div>
+          <button id="registerBtn" class="btn secondary block">Create account</button>
+          <p class="small muted mt12"><span class="la-icon-slot" data-icon="warning"></span> Creating an account here only makes a Firebase Auth user. It will
+          <b>not</b> be able to see the admin dashboard until a project owner manually adds a matching document
+          to the <code>admins</code> collection in Firestore. See SETUP.md → "Creating your first admin".</p>
+        </div>
+      </details>
+
+      <p class="center small muted mt20"><a href="index.html" style="color:var(--cyan)">← Back to citizen app</a></p>
+    </div>
+  </div>
+
+<script>if(location.hash==="#adminSignupDetails")document.getElementById("adminSignupDetails")?.setAttribute("open","");</script><script type="module">
+import {
+  auth, db, doc, getDoc, setDoc, signInWithEmailAndPassword, sendPasswordResetEmail, createUserWithEmailAndPassword,
+  onAuthStateChanged, isAdmin
+} from "./js/firebase-init.js";
+
+onAuthStateChanged(auth, async (user) => {
+  if (user && await isAdmin(user.uid)) {
+    window.location.href = "admin.html";
+  }
+});
+
+const errEl = document.getElementById("err");
+const uidBox=document.getElementById("uidResult"), uidValue=document.getElementById("uidValue"), setupMsg=document.getElementById("setupMsg");
+function showErr(msg){ errEl.textContent = msg; errEl.style.display = "block"; }
+function showUid(uid){uidValue.textContent=uid;uidBox.hidden=false;setupMsg.textContent="Account is ready. Copy the UID above, add it in Firestore under admins, then sign in again.";setupMsg.style.display="block";uidBox.scrollIntoView({behavior:"smooth",block:"center"});}
+document.getElementById("copyUidBtn").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(uidValue.textContent);document.getElementById("copyUidBtn").textContent="Copied";}catch(_){const r=document.createRange();r.selectNodeContents(uidValue);const selection=window.getSelection();selection.removeAllRanges();selection.addRange(r);document.getElementById("copyUidBtn").textContent="Select the UID and copy";}});
+
+document.getElementById("resetPasswordBtn").addEventListener("click", async () => {
+  errEl.style.display = "none";
+  const email = document.getElementById("email").value.trim();
+  if (!email) return showErr("Enter your account email above first.");
+  try {
+    await sendPasswordResetEmail(auth, email);
+    setupMsg.textContent = "If an account exists for this email, Firebase has sent a password reset message. Check your inbox and spam folder.";
+    setupMsg.style.display = "block";
+  } catch (e) { showErr(e.message); }
+});
+
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  errEl.style.display = "none";
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  if (!email || !password) return showErr("Enter email and password.");
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const admin = await isAdmin(cred.user.uid);
+    if (!admin) {
+      showUid(cred.user.uid);
+      showErr("This account is not authorised yet. Add the UID shown below as the document ID in the admins collection, then sign in again.");
+      return;
+    }
+    window.location.href = "admin.html";
+  } catch (e) {
+    showErr(e.code === "auth/invalid-credential" ? "Email or password is incorrect. If you already created this account, use Forgot password? above." : e.message);
+  }
+});
+
+document.getElementById("registerBtn").addEventListener("click", async () => {
+  errEl.style.display = "none";
+  const name = document.getElementById("regName").value.trim();
+  const email = document.getElementById("regEmail").value.trim();
+  const pass = document.getElementById("regPass").value;
+  if (!name || !email || !pass) return showErr("Fill in all registration fields.");
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    showUid(cred.user.uid);
+  } catch (e) {
+    showErr(e.code === "auth/email-already-in-use" ? "This email already has an account. That does not mean it is an admin. Use Sign in above; if it is not authorised, the UID will be shown here." : e.message);
+  }
+});
+</script>
+</body>
+</html>
+
+
+
+
+

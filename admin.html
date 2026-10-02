@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LankaAlert — Admin Dashboard</title>
+<link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/professional.css?v=20260924v27">
+<script src="js/custom-icons.js?v=20260924v30"></script><link rel="stylesheet" href="css/v15-professional.css?v=20260924v27"><link rel="stylesheet" href="css/v20-system.css?v=20260924v20">
+<link rel="stylesheet" href="css/v30-icon-system.css?v=20260924v30">
+<link rel="icon" type="image/svg+xml" href="icon.svg?v=20260924v30">
+<link rel="alternate icon" type="image/png" href="favicon-32.png?v=20260924v30">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20260924v30">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=20260924v30">
+<link rel="stylesheet" href="css/trustcraft-inspired.css?v=20260928tc1"><link rel="stylesheet" href="css/sinhala-apple-typography.css?v=20260928si3"><link rel="stylesheet" href="css/final-ui-cleanup.css?v=20260928ui1"><link rel="stylesheet" href="css/v36-national-features.css?v=20261001n1"><link rel="stylesheet" href="css/v38-national-expansion.css?v=20261001v38"></head>
+<body>
+<div class="admin-shell">
+  <div class="admin-sidebar" id="sidebar">
+    <div class="brand"><div class="logo" style="width:30px;height:30px;font-size:14px;"><img class="brand-logo-image" src="assets/Logo.webp" alt="LankaAlert"></div>LankaAlert</div>
+    <div class="admin-nav-item active" data-panel="overview"><span class="la-icon-slot" data-icon="chart"></span> <span data-i18n="adminOverview">Overview</span></div>
+    <div class="admin-nav-item" data-panel="alerts"><span class="la-icon-slot" data-icon="bell"></span> <span data-i18n="adminAlerts">Alerts</span></div>
+    <div class="admin-nav-item" data-panel="stations"><span class="la-icon-slot" data-icon="flood"></span> <span data-i18n="adminStations">River Stations</span></div>
+    <div class="admin-nav-item" data-panel="reports"><span class="la-icon-slot" data-icon="report"></span> <span data-i18n="adminReports">Citizen Reports</span></div>
+    <div class="admin-nav-item" data-panel="notices"><span class="la-icon-slot" data-icon="megaphone"></span> <span>Community Notices</span></div>
+    <div class="admin-nav-item" data-panel="users"><span class="la-icon-slot" data-icon="users"></span> <span data-i18n="adminUsers">Users</span></div>
+    <div class="admin-nav-item" data-panel="admins"><span class="la-icon-slot" data-icon="safe"></span> <span data-i18n="adminAccounts">Admin Accounts</span></div>
+    <div style="flex:1;"></div>
+    <div class="admin-nav-item" id="backToApp"><span class="la-icon-slot" data-icon="home"></span> <span data-i18n="adminCitizenApp">Citizen App</span></div>
+    <div class="admin-nav-item" id="signOutBtn"><span class="la-icon-slot" data-icon="back"></span> <span data-i18n="adminSignOut">Sign out</span></div>
+  </div>
+
+  <div class="admin-main">
+    <div class="admin-topline">
+      <div class="admin-top-actions"><label class="sr-only" for="adminLang">Language</label><select id="adminLang" aria-label="Language"><option value="si">සිංහල</option><option value="ta">தமிழ்</option><option value="en">English</option></select></div>
+      <div>
+        <button class="icon-btn" id="menuBtn" style="display:none;"><span class="la-icon-slot" data-icon="menu"></span></button>
+        <h1 id="panelTitle" data-i18n="adminOverview">Overview</h1>
+        <div class="small muted" id="adminWhoami"></div>
+      </div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div id="panel-overview">
+      <div class="stat-grid">
+        <div class="panel stat-card glow-border"><div class="v" id="statAlerts">0</div><div class="l" data-i18n="adminActiveAlerts">Active alerts</div></div>
+        <div class="panel stat-card glow-border"><div class="v" id="statReports">0</div><div class="l" data-i18n="adminCitizenReports">Citizen reports</div></div>
+        <div class="panel stat-card glow-border"><div class="v" id="statUnverified">0</div><div class="l" data-i18n="adminAwaitingVerification">Awaiting verification</div></div>
+        <div class="panel stat-card glow-border"><div class="v" id="statUsers">0</div><div class="l" data-i18n="adminRegisteredCitizens">Registered citizens</div></div>
+      </div>
+      <div class="panel">
+        <h3 class="mb12" data-i18n="adminLatestReports">Latest reports</h3>
+        <div class="table-wrap"><table id="overviewReportsTable"><thead><tr><th data-i18n="adminUser">User</th><th data-i18n="adminType">Type</th><th data-i18n="adminDistrict">District</th><th data-i18n="adminWhen">When</th><th data-i18n="adminStatus">Status</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ALERTS -->
+    <div id="panel-alerts" class="hidden">
+      <div class="panel mb16">
+        <h3 class="mb12" data-i18n="adminIssueAlert">Issue new alert</h3>
+        <div class="form-grid">
+          <div class="field"><label data-i18n="adminTitle">Title</label><input id="alTitle" placeholder="Flood Warning — Kelani River Basin"></div>
+          <div class="field"><label data-i18n="adminType">Type</label>
+            <select id="alType"><option value="flood">Flood</option><option value="landslide">Landslide</option><option value="wind">Wind</option><option value="rain">Heavy Rain</option></select>
+          </div>
+          <div class="field"><label data-i18n="adminTier">Tier</label>
+            <select id="alTier"><option value="watch">Watch</option><option value="warning">Warning</option><option value="emergency">Emergency</option></select>
+          </div>
+          <div class="field"><label data-i18n="adminSource">Source</label>
+            <select id="alSource"><option value="official">Official DMC</option><option value="model">Model-generated</option></select>
+          </div>
+          <div class="field"><label data-i18n="adminIssued">Issued by</label><input id="alIssuedBy" placeholder="Disaster Management Centre"></div>
+          <div class="field"><label data-i18n="adminAreas">Affected areas (comma separated)</label><input id="alAreas" placeholder="Ratnapura, Kegalle, Kalutara"></div>
+        </div>
+        <div class="field"><label data-i18n="adminMessage">Message</label><textarea id="alMessage" rows="3" placeholder="Water levels in Kelani River are rising rapidly..."></textarea></div>
+        <button class="btn" id="alSubmitBtn" data-i18n="adminPublishAlert">Publish Alert</button>
+      </div>
+      <div class="panel">
+        <h3 class="mb12" data-i18n="adminExistingAlerts">Existing alerts</h3>
+        <div class="table-wrap"><table id="alertsTable"><thead><tr><th data-i18n="adminTitle">Title</th><th data-i18n="adminTier">Tier</th><th data-i18n="adminSource">Source</th><th data-i18n="adminAreas">Areas</th><th data-i18n="adminIssued">Issued</th><th></th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- STATIONS -->
+    <div id="panel-stations" class="hidden">
+      <div class="panel mb16">
+        <h3 class="mb12" data-i18n="adminUpdateStation">Update river / rainfall station reading</h3>
+        <p class="small muted mb12">Manually verified figures from the Department of Irrigation / District office. These feed the "River Level" card in the citizen app for that district. (Live rainfall/wind/temperature elsewhere in the app already comes from the automatic Open-Meteo live feed — see SETUP.md for plugging in an official government or Windy API key.)</p>
+        <div class="form-grid">
+          <div class="field"><label data-i18n="adminDistrict">District</label><select id="stDistrict"></select></div>
+          <div class="field"><label data-i18n="adminCurrentLevel">Current level (m)</label><input id="stLevel" type="number" step="0.01" placeholder="4.25"></div>
+          <div class="field"><label data-i18n="adminDangerLevel">Danger level (m)</label><input id="stDanger" type="number" step="0.01" placeholder="5.00"></div>
+          <div class="field"><label data-i18n="adminTrend">Trend</label><select id="stTrend"><option value="stable">Stable</option><option value="rising">Rising</option><option value="falling">Falling</option></select></div>
+        </div>
+        <button class="btn" id="stSubmitBtn" data-i18n="adminSaveStation">Save station reading</button>
+      </div>
+      <div class="panel">
+        <h3 class="mb12" data-i18n="adminCurrentReadings">Current station readings</h3>
+        <div class="table-wrap"><table id="stationsTable"><thead><tr><th data-i18n="adminDistrict">District</th><th data-i18n="adminLevel">Level</th><th data-i18n="adminDangerMark">Danger mark</th><th data-i18n="adminTrend">Trend</th><th data-i18n="adminUpdated">Updated</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div id="panel-reports" class="hidden">
+      <div class="panel">
+        <h3 class="mb12" data-i18n="adminIncidentReports">Citizen incident reports</h3>
+        <div class="table-wrap"><table id="reportsTable"><thead><tr><th data-i18n="adminUser">User</th><th data-i18n="adminType">Type</th><th data-i18n="adminDescription">Description</th><th data-i18n="adminDistrict">District</th><th data-i18n="adminWhen">When</th><th data-i18n="adminStatus">Status</th><th></th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- COMMUNITY NOTICES -->
+    <div id="panel-notices" class="hidden">
+      <div class="panel mb16">
+        <div class="la-nf-head"><div><span class="eyebrow">VERIFIED LOCAL NOTICE</span><h2>School &amp; Community Broadcast</h2><p class="muted">Publish a clearly attributed notice for a national, district, school or GN/community audience.</p></div><span class="la-nf-badge">ADMIN PUBLISH</span></div>
+        <div class="form-grid">
+          <div class="field"><label>Title</label><input id="noticeTitle" maxlength="120" placeholder="Temporary school closure due to flood conditions"></div>
+          <div class="field"><label>Audience</label><select id="noticeAudience"><option value="national">National</option><option value="school">School</option><option value="gn">GN / local authority</option><option value="community">Community</option></select></div>
+          <div class="field"><label>Target area</label><select id="noticeArea"></select></div>
+          <div class="field"><label>Target name</label><input id="noticeTargetName" maxlength="120" placeholder="Sivali Central College / GN Division / Community"></div>
+          <div class="field"><label>Priority</label><select id="noticePriority"><option value="INFO">Info</option><option value="IMPORTANT">Important</option><option value="URGENT">Urgent</option></select></div>
+          <div class="field"><label>Issued by</label><input id="noticeIssuedBy" maxlength="120" placeholder="School Principal / GN Officer / Local Authority"></div>
+          <div class="field"><label>Issuer type</label><select id="noticeIssuerType"><option value="school">School</option><option value="gn">GN / local authority</option><option value="community">Community authority</option></select></div>
+          <div class="field"><label>Verification source URL</label><input id="noticeSourceUrl" maxlength="500" type="url" placeholder="Official source / authority reference URL"></div>
+        </div>
+        <div class="field"><label>Message</label><textarea id="noticeMessage" rows="4" maxlength="800" placeholder="Write the verified local instruction clearly and without ambiguity."></textarea></div>
+        <div class="form-grid"><div class="field"><label>Expires at</label><input id="noticeExpires" type="datetime-local"></div></div>
+        <button class="btn" id="noticePublishBtn">Publish verified notice</button>
+      </div>
+      <div class="panel">
+        <h3 class="mb12">Published notices</h3>
+        <div class="table-wrap"><table id="noticesTable"><thead><tr><th>Title</th><th>Audience</th><th>Area</th><th>Priority</th><th>Issued</th><th></th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div id="panel-users" class="hidden">
+      <div class="panel">
+        <h3 class="mb12" data-i18n="adminRegistered">Registered citizens</h3>
+        <div class="table-wrap"><table id="usersTable"><thead><tr><th data-i18n="adminName">Name</th><th data-i18n="adminEmail">Email</th><th data-i18n="adminHomeArea">Home area</th><th data-i18n="adminJoined">Joined</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ADMINS -->
+    <div id="panel-admins" class="hidden">
+      <div class="panel mb16">
+        <h3 class="mb12" data-i18n="adminGrantAccess">Grant admin access</h3>
+        <p class="small muted mb12">Enter the Firebase Auth UID of an account created on the Admin Login page's "Create account" form. This is the only way to become an admin — see SETUP.md.</p>
+        <div class="form-grid">
+          <div class="field"><label data-i18n="adminUserUid">User UID</label><input id="newAdminUid" placeholder="e.g. AbCdEf123456..."></div>
+          <div class="field"><label data-i18n="adminNameLabel">Name / label</label><input id="newAdminName" placeholder="D.M. Officer — Ratnapura"></div>
+        </div>
+        <button class="btn" id="addAdminBtn" data-i18n="adminGrantAdmin">Grant admin</button>
+      </div>
+      <div class="panel">
+        <h3 class="mb12" data-i18n="adminCurrentAdmins">Current admins</h3>
+        <div class="table-wrap"><table id="adminsTable"><thead><tr><th>User UID</th><th data-i18n="adminName">Name</th><th data-i18n="adminAdded">Added</th><th></th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toastHost"></div>
+<script type="module" src="js/admin-i18n.js?v=20260924v27"></script><script type="module" src="js/admin.js"></script><script type="module" src="js/admin-v38-expansion.js?v=20261001v38"></script><script type="module" src="js/admin-pro.js?v=20260924v27"></script>
+</body>
+</html>
